@@ -51,7 +51,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.25, 0.75, 0.45, 1)
 theme_override_font_sizes/font_size = 14
-text = "Level 1/3: Tutorial (Easy)"
+text = "Level 0 — Tutorial"
 vertical_alignment = 1
  
 [node name="MazeLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TopRow"]
@@ -71,7 +71,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.7, 0.4, 1)
 theme_override_font_sizes/font_size = 11
-text = "Complete both mazes to advance."
+text = "Both characters must be on their goals at the same time."
 vertical_alignment = 1
  
 [node name="InstructionLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/BottomRow"]

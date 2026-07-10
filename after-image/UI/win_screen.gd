@@ -30,9 +30,9 @@ func setup_screen(is_last_level: bool) -> void:
 		
 	if is_last_level:
 		title_label.text = "GAME COMPLETE!"
-		desc_label.text = "Congratulations! You have completed all levels."
+		desc_label.text = "Outstanding! You beat all four stages."
 		primary_button.text = "Restart Game"
 	else:
 		title_label.text = "LEVEL COMPLETE!"
-		desc_label.text = "Both characters reached their goals!"
+		desc_label.text = "Both characters stood on their goals simultaneously!"
 		primary_button.text = "Next Level"
