@@ -29,10 +29,6 @@ func reset_to_start() -> void:
 	position = Vector2(grid_pos.x * 32 + 16, grid_pos.y * 32 + 16)
 
 func try_move(input_dir: Vector2i) -> void:
-	# Once a player reaches the goal, they remain complete and lock in place
-	if has_reached_goal:
-		return
-
 	var actual_dir = -input_dir if is_inverted else input_dir
 	var target_pos = grid_pos + actual_dir
 	
@@ -65,6 +61,7 @@ func move_to_grid_pos() -> void:
 	)
 
 func check_goal() -> void:
-	if grid_pos == goal_grid_pos and not has_reached_goal:
-		has_reached_goal = true
+	var on_goal = (grid_pos == goal_grid_pos)
+	if on_goal != has_reached_goal:
+		has_reached_goal = on_goal
 		goal_reached.emit()

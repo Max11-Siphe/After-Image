@@ -46,16 +46,16 @@ corner_radius_bottom_left = 6
 script = ExtResource("1_win_script")
 
 [node name="Panel" type="Panel" parent="."]
-custom_minimum_size = Vector2(400, 260)
+custom_minimum_size = Vector2(400, 300)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -200.0
-offset_top = -130.0
+offset_top = -150.0
 offset_right = 200.0
-offset_bottom = 130.0
+offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_win_panel")
@@ -67,14 +67,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 alignment = 1
 
 [node name="TitleLabel" type="Label" parent="Panel/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.75, 0.45, 1)
 theme_override_font_sizes/font_size = 28
-text = "VICTORY!"
+text = "LEVEL COMPLETE!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -87,10 +87,10 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ControlSpacer" type="Control" parent="Panel/VBoxContainer"]
-custom_minimum_size = Vector2(0, 10)
+custom_minimum_size = Vector2(0, 4)
 layout_mode = 2
 
-[node name="RestartButton" type="Button" parent="Panel/VBoxContainer"]
+[node name="PrimaryButton" type="Button" parent="Panel/VBoxContainer"]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -99,7 +99,18 @@ theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-text = "Restart Game"
+text = "Next Level"
+
+[node name="RetryButton" type="Button" parent="Panel/VBoxContainer"]
+custom_minimum_size = Vector2(240, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+text = "Retry Level"
 
 [node name="QuitButton" type="Button" parent="Panel/VBoxContainer"]
 custom_minimum_size = Vector2(240, 36)

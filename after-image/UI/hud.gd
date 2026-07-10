@@ -1,7 +1,12 @@
 extends CanvasLayer
 
-@onready var maze_label: Label = $Panel/MarginContainer/HBoxContainer/MazeLabel
-@onready var status_label: Label = $Panel/MarginContainer/HBoxContainer/StatusLabel
+@onready var level_label: Label = $Panel/MarginContainer/VBoxContainer/TopRow/LevelLabel
+@onready var maze_label: Label = $Panel/MarginContainer/VBoxContainer/TopRow/MazeLabel
+@onready var status_label: Label = $Panel/MarginContainer/VBoxContainer/BottomRow/StatusLabel
+
+func set_level_info(level_num: int, total_levels: int, theme_name: String, difficulty: String) -> void:
+	if level_label:
+		level_label.text = "Level %d/%d: %s (%s)" % [level_num, total_levels, theme_name, difficulty]
 
 func set_viewing_maze(index: int) -> void:
 	if maze_label:
