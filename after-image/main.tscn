@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://d30lwy7abj05o"]
 
 [ext_resource type="Script" uid="uid://cn336bb0e1whl" path="res://scripts/game_manager.gd" id="1_manager"]
-[ext_resource type="PackedScene" path="res://levels/maze_1.tscn" id="2_maze1"]
-[ext_resource type="PackedScene" path="res://levels/maze_2.tscn" id="3_maze2"]
+[ext_resource type="PackedScene" path="res://levels/tutorial_maze_1.tscn" id="2_maze1"]
+[ext_resource type="PackedScene" path="res://levels/tutorial_maze_2.tscn" id="3_maze2"]
 [ext_resource type="PackedScene" path="res://players/player.tscn" id="4_player"]
 [ext_resource type="PackedScene" path="res://UI/hud.tscn" id="5_hud"]
 [ext_resource type="PackedScene" path="res://UI/win_screen.tscn" id="6_winscreen"]

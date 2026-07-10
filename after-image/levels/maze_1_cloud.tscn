@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://cyfevpr22sn5e"]
+
+[ext_resource type="Script" uid="uid://cgtypqvrmc3ep" path="res://levels/base_maze.gd" id="1_agaqh"]
+[ext_resource type="TileSet" uid="uid://doakfjlbut6it" path="res://tilesets/shared_tileset.tres" id="2_myatn"]
+[ext_resource type="Texture2D" uid="uid://dewx8mai6knf6" path="res://placeholder_art/goal.png" id="3_e5f1k"]
+
+[node name="Maze1" type="Node2D" unique_id=1183315743]
+script = ExtResource("1_agaqh")
+map_string = "#########################
+#S..#.................###
+###.#####.###.#######.###
+#.#.....#.#.#.....#...###
+#.#####.#.#.#####.#.#####
+#.#...#.#.......#.#.#G###
+#.#.#.#.#######.#.#.#.###
+#...#.#...#...#.#.#.#.###
+#.###.###.#.#.###.#.#.###
+#...#.......#.....#...###
+#########################
+#.#########.#########.###
+#X......................#
+#########################"
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=901834456]
+tile_set = ExtResource("2_myatn")
+
+[node name="Goal" type="Sprite2D" parent="." unique_id=1357813012]
+texture = ExtResource("3_e5f1k")
