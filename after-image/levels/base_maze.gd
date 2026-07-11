@@ -4,6 +4,7 @@ extends Node2D
 
 @onready var tilemap_layer: TileMapLayer = $TileMapLayer
 @onready var goal_sprite: Sprite2D = $Goal
+@onready var swap_sprite: Sprite2D = get_node_or_null("SwapMarker")
 
 var spawn_grid_pos: Vector2i
 var goal_grid_pos: Vector2i
@@ -47,6 +48,8 @@ func setup_maze() -> void:
 					goal_sprite.position = Vector2(coords.x * 32 + 16, coords.y * 32 + 16)
 			elif cell_char == "X":              # ADD THIS BLOCK
 				swap_grid_pos = coords
+				if swap_sprite:
+					swap_sprite.position = Vector2(coords.x * 32 + 16, coords.y * 32 + 16)
 
 func set_occupied(occupied: bool) -> void:
 	if _glow_tween:

@@ -27,6 +27,6 @@ tile_set = ExtResource("2_tileset")
 [node name="Goal" type="Sprite2D" parent="." unique_id=720881181]
 texture = ExtResource("3_goal_texture")
 
-[node name="SwapMarker" type="Sprite2D" parent="Goal" unique_id=340050965]
+[node name="SwapMarker" type="Sprite2D" parent="." unique_id=340050965]
 modulate = Color(0.85430586, 0.58383155, 0.95468724, 1)
 texture = ExtResource("3_goal_texture")
