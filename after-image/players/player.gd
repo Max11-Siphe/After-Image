@@ -1,10 +1,12 @@
 extends CharacterBody2D
 
 signal goal_reached
+signal swap_zone_entered
 
 @export var is_inverted: bool = false
 @export var spawn_grid_pos: Vector2i = Vector2i(1, 1)
 @export var goal_grid_pos: Vector2i = Vector2i(23, 12)
+@export var swap_grid_pos: Vector2i = Vector2i(-1, -1)
 @export var maze_layer: TileMapLayer
 
 var grid_pos: Vector2i
@@ -20,6 +22,14 @@ func _ready() -> void:
 		else:
 			sprite.texture = load("res://placeholder_art/char1.png")
 	reset_to_start()
+
+func update_sprite() -> void:
+	var sprite = $Sprite2D
+	if sprite:
+		if is_inverted:
+			sprite.texture = load("res://placeholder_art/char2.png")
+		else:
+			sprite.texture = load("res://placeholder_art/char1.png")
 
 func reset_to_start() -> void:
 	grid_pos = spawn_grid_pos
@@ -58,7 +68,12 @@ func move_to_grid_pos() -> void:
 	tween.tween_callback(func():
 		is_moving = false
 		check_goal()
+		check_swap()
 	)
+
+func check_swap() -> void:
+	if swap_grid_pos.x >= 0 and grid_pos == swap_grid_pos:
+		swap_zone_entered.emit()
 
 func check_goal() -> void:
 	var on_goal = (grid_pos == goal_grid_pos)

@@ -129,7 +129,9 @@ func load_level(index: int) -> void:
 	character1.maze_layer = maze1.tilemap_layer
 	character1.spawn_grid_pos = maze1.spawn_grid_pos
 	character1.goal_grid_pos = maze1.goal_grid_pos
+	character1.swap_grid_pos = maze1.swap_grid_pos
 	character1.goal_reached.connect(_on_character_goal_reached)
+	character1.swap_zone_entered.connect(_on_swap_zone_entered)
 	maze1.add_child(character1)
 	
 	character2 = player_scene.instantiate()
@@ -138,11 +140,22 @@ func load_level(index: int) -> void:
 	character2.maze_layer = maze2.tilemap_layer
 	character2.spawn_grid_pos = maze2.spawn_grid_pos
 	character2.goal_grid_pos = maze2.goal_grid_pos
+	character2.swap_grid_pos = maze2.swap_grid_pos
 	character2.goal_reached.connect(_on_character_goal_reached)
+	character2.swap_zone_entered.connect(_on_swap_zone_entered)
 	maze2.add_child(character2)
 	
 	# 4. Restart gameplay loop
 	restart_game()
+
+func _on_swap_zone_entered() -> void:
+	if is_game_won:
+		return
+	character1.is_inverted = !character1.is_inverted
+	character2.is_inverted = !character2.is_inverted
+	character1.update_sprite()
+	character2.update_sprite()
+	toggle_view()
 
 func toggle_view() -> void:
 	if current_view == 1:

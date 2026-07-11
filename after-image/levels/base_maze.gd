@@ -7,6 +7,7 @@ extends Node2D
 
 var spawn_grid_pos: Vector2i
 var goal_grid_pos: Vector2i
+var swap_grid_pos: Vector2i = Vector2i(-1, -1)
 
 var _glow_tween: Tween
 var _flash_tween: Tween
@@ -44,6 +45,8 @@ func setup_maze() -> void:
 				goal_grid_pos = coords
 				if goal_sprite:
 					goal_sprite.position = Vector2(coords.x * 32 + 16, coords.y * 32 + 16)
+			elif cell_char == "X":              # ADD THIS BLOCK
+				swap_grid_pos = coords
 
 func set_occupied(occupied: bool) -> void:
 	if _glow_tween:

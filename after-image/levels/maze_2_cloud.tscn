@@ -16,13 +16,17 @@ map_string = "#########################
 #.....#.....#.#.#.#...###
 #####.#.###.###.#.#######
 #.......#.......#....G###
-#########################
 #.#########.#########.###
-#.......................#
+#.#########.#########.###
+#X......................#
 #########################"
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=585138925]
 tile_set = ExtResource("2_3rho4")
 
 [node name="Goal" type="Sprite2D" parent="." unique_id=351377750]
+texture = ExtResource("3_khj38")
+
+[node name="SwapMarker" type="Sprite2D" parent="Goal" unique_id=793380000]
+modulate = Color(0.85430586, 0.58383155, 0.95468724, 1)
 texture = ExtResource("3_khj38")
