@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://26u2rdrq5cdu"]
+
+[ext_resource type="Script" uid="uid://cgtypqvrmc3ep" path="res://levels/base_maze.gd" id="1_augyi"]
+[ext_resource type="TileSet" uid="uid://doakfjlbut6it" path="res://tilesets/shared_tileset.tres" id="2_f8n0y"]
+[ext_resource type="Texture2D" uid="uid://dewx8mai6knf6" path="res://placeholder_art/goal.png" id="3_d87fx"]
+
+[node name="Maze1" type="Node2D" unique_id=1183315743]
+script = ExtResource("1_augyi")
+map_string = "#########################
+#S....#.....#.........###
+#####.#.###.#.###.#######
+#...#...#...#...#.....###
+#.#.#####.###.#####.#.###
+#.#.....#.#G..#...#.#.###
+#.#####.#.#####.#.###.###
+#.....#.#.#.....#.....###
+#.###.###.#.#########.###
+#...#.......#.........###
+#.#########.#########.###
+#.#########.#########.###
+#X......................#
+#########################"
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=901834456]
+tile_set = ExtResource("2_f8n0y")
+
+[node name="Goal" type="Sprite2D" parent="." unique_id=1357813012]
+texture = ExtResource("3_d87fx")
+
+[node name="SwapMarker" type="Sprite2D" parent="." unique_id=1097473129]
+modulate = Color(0.85430586, 0.58383155, 0.95468724, 1)
+texture = ExtResource("3_d87fx")
