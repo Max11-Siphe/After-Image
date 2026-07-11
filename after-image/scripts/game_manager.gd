@@ -51,10 +51,14 @@ var current_level_index: int = 0
 var current_view: int = 1
 var is_game_won: bool = false
 
-# Echo Trail Flags
-var is_trail_armed: bool = false
-var trail_revealed_this_level: bool = false
-var current_trail_lines: Array[Line2D] = []
+# Echo Footprints State
+const FootprintClass = preload("res://scripts/footprint.gd")
+var footprint_reveal_triggered: bool = false
+var footprint_reveal_used: bool = false
+var footprint_fade_active: bool = false
+var footprint_fade_tween: Tween = null
+var footprints_p1: Array[Node2D] = []
+var footprints_p2: Array[Node2D] = []
 
 # Intro and UI Overlays
 var intro_scene: CanvasLayer = null
@@ -138,8 +142,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("switch_view"):
-		is_trail_armed = true
 		toggle_view()
+		if not footprint_reveal_used:
+			show_echo_trails()
 		get_viewport().set_input_as_handled()
 		return
 
@@ -253,10 +258,6 @@ func _on_swap_zone_entered() -> void:
 		return
 	print("SWAP — char1: ", character1.grid_pos, "  char2: ", character2.grid_pos)
 	
-	# Trigger Echo Trail system before teleporting the players
-	if is_trail_armed and not trail_revealed_this_level:
-		show_echo_trails()
-	
 	character1.is_inverted = !character1.is_inverted
 	character2.is_inverted = !character2.is_inverted
 	character1.update_sprite()
@@ -266,38 +267,56 @@ func _on_swap_zone_entered() -> void:
 	toggle_view()
 
 func show_echo_trails() -> void:
-	trail_revealed_this_level = true
+	footprint_reveal_triggered = true
+	footprint_reveal_used = true
+	footprint_fade_active = true
 	
-	# P1 trail on Maze 1
-	var line1 = Line2D.new()
-	line1.width = 4.0
-	line1.default_color = Color(0.2, 0.7, 1.0, 0.8) # Blue/Cyan for P1
-	line1.z_index = 5
-	line1.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Instantiate footprints for P1 on Maze 1
 	for pt in character1.path_history:
-		line1.add_point(Vector2(pt.x * 32 + 16, pt.y * 32 + 16))
-	maze1.add_child(line1)
-	current_trail_lines.append(line1)
-	
-	# P2 trail on Maze 2
-	var line2 = Line2D.new()
-	line2.width = 4.0
-	line2.default_color = Color(1.0, 0.5, 0.2, 0.8) # Orange/Red for P2
-	line2.z_index = 5
-	line2.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var fp = FootprintClass.new()
+		fp.position = Vector2(pt.x * 32 + 16, pt.y * 32 + 16)
+		fp.color = Color(0.2, 0.7, 1.0, 0.8) # Blue/Cyan
+		maze1.add_child(fp)
+		footprints_p1.append(fp)
+		
+	# Instantiate footprints for P2 on Maze 2
 	for pt in character2.path_history:
-		line2.add_point(Vector2(pt.x * 32 + 16, pt.y * 32 + 16))
-	maze2.add_child(line2)
-	current_trail_lines.append(line2)
+		var fp = FootprintClass.new()
+		fp.position = Vector2(pt.x * 32 + 16, pt.y * 32 + 16)
+		fp.color = Color(1.0, 0.5, 0.2, 0.8) # Orange/Red
+		maze2.add_child(fp)
+		footprints_p2.append(fp)
+		
+	# Set up the 5-second fade-out Tween
+	footprint_fade_tween = create_tween()
+	footprint_fade_tween.set_parallel(true)
 	
-	# Start 3 second fade-out timer
-	get_tree().create_timer(3.0).timeout.connect(clear_trails)
+	for fp in footprints_p1:
+		footprint_fade_tween.tween_property(fp, "modulate:a", 0.0, 5.0)
+	for fp in footprints_p2:
+		footprint_fade_tween.tween_property(fp, "modulate:a", 0.0, 5.0)
+		
+	footprint_fade_tween.set_parallel(false)
+	footprint_fade_tween.tween_callback(func():
+		clear_trails()
+	)
 
 func clear_trails() -> void:
-	for line in current_trail_lines:
-		if is_instance_valid(line):
-			line.queue_free()
-	current_trail_lines.clear()
+	if footprint_fade_tween:
+		footprint_fade_tween.kill()
+		footprint_fade_tween = null
+		
+	for fp in footprints_p1:
+		if is_instance_valid(fp):
+			fp.queue_free()
+	footprints_p1.clear()
+	
+	for fp in footprints_p2:
+		if is_instance_valid(fp):
+			fp.queue_free()
+	footprints_p2.clear()
+	
+	footprint_fade_active = false
 
 func toggle_view() -> void:
 	current_view = 2 if current_view == 1 else 1
@@ -405,8 +424,9 @@ func restart_game() -> void:
 	win_screen.visible = false
 	current_view = 1
 
-	is_trail_armed = false
-	trail_revealed_this_level = false
+	footprint_reveal_triggered = false
+	footprint_reveal_used = false
+	footprint_fade_active = false
 	clear_trails()
 
 	if is_instance_valid(character1):
