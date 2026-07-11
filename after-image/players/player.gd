@@ -12,6 +12,7 @@ signal swap_zone_entered
 var grid_pos: Vector2i
 var is_moving: bool = false
 var has_reached_goal: bool = false
+var path_history: Array[Vector2i] = []
 
 func _ready() -> void:
 	# Set texture dynamically based on inverted state
@@ -35,6 +36,8 @@ func reset_to_start() -> void:
 	grid_pos = spawn_grid_pos
 	has_reached_goal = false
 	is_moving = false
+	path_history.clear()
+	path_history.append(grid_pos)
 	# Center character in tile (each tile is 32x32, offset by 16, 16)
 	position = Vector2(grid_pos.x * 32 + 16, grid_pos.y * 32 + 16)
 
@@ -44,6 +47,8 @@ func try_move(input_dir: Vector2i) -> void:
 	
 	if is_walkable(target_pos):
 		grid_pos = target_pos
+		if path_history.is_empty() or path_history[-1] != grid_pos:
+			path_history.append(grid_pos)
 		move_to_grid_pos()
 
 func is_walkable(coords: Vector2i) -> bool:

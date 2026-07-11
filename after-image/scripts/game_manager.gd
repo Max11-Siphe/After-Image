@@ -29,6 +29,13 @@ const LEVEL_DATA = [
 		"difficulty": "Hard",
 		"maze1_scene": "res://levels/maze_1_cloud.tscn",
 		"maze2_scene": "res://levels/maze_2_cloud.tscn"
+	},
+	{
+		"display_num": 4,
+		"name": "Dream Core",
+		"difficulty": "Finale",
+		"maze1_scene": "res://levels/dream_core_room.tscn",
+		"maze2_scene": "res://levels/dream_core_room.tscn"
 	}
 ]
 
@@ -44,12 +51,25 @@ var current_level_index: int = 0
 var current_view: int = 1
 var is_game_won: bool = false
 
+# Echo Trail Flags
+var is_trail_armed: bool = false
+var trail_revealed_this_level: bool = false
+var current_trail_lines: Array[Line2D] = []
+
+# Intro and UI Overlays
+var intro_scene: CanvasLayer = null
+var tutorial_instructions: CanvasLayer = null
+var dream_core_intro: CanvasLayer = null
+var endings_screen: CanvasLayer = null
+
 func _ready() -> void:
 	setup_input_actions()
 	win_screen.primary_pressed.connect(_on_win_screen_primary)
 	win_screen.retry_pressed.connect(_on_win_screen_retry)
 	win_screen.quit_pressed.connect(_on_win_screen_quit)
-	load_level(0)
+	
+	# Start by displaying story intro title screen
+	show_story_introduction()
 
 func setup_input_actions() -> void:
 	var actions = {
@@ -67,7 +87,49 @@ func setup_input_actions() -> void:
 				event.physical_keycode = key
 				InputMap.action_add_event(action, event)
 
+func show_story_introduction() -> void:
+	# Clean up any existing instances
+	if is_instance_valid(intro_scene):
+		intro_scene.queue_free()
+	
+	# Hide gameplay HUD & characters during story
+	hud.visible = false
+	win_screen.visible = false
+	is_game_won = true # block input
+	
+	var intro_scene_res = load("res://UI/intro_cutscene.tscn")
+	intro_scene = intro_scene_res.instantiate()
+	add_child(intro_scene)
+	intro_scene.intro_finished.connect(_on_intro_finished)
+
+func _on_intro_finished(success: bool) -> void:
+	if success:
+		# Show tutorial screen
+		intro_scene.queue_free()
+		show_tutorial_instructions()
+	else:
+		# Should not reach here because 'No' triggers GameOver which has its own buttons handled in the scene
+		pass
+
+func show_tutorial_instructions() -> void:
+	if is_instance_valid(tutorial_instructions):
+		tutorial_instructions.queue_free()
+		
+	var tut_res = load("res://UI/tutorial_instructions.tscn")
+	tutorial_instructions = tut_res.instantiate()
+	add_child(tutorial_instructions)
+	tutorial_instructions.tutorial_started.connect(_on_tutorial_started)
+
+func _on_tutorial_started() -> void:
+	tutorial_instructions.queue_free()
+	hud.visible = true
+	load_level(0)
+
 func _unhandled_input(event: InputEvent) -> void:
+	# If any story or intro overlay is open, block all movement and tab
+	if is_instance_valid(intro_scene) or is_instance_valid(tutorial_instructions) or is_instance_valid(dream_core_intro) or is_instance_valid(endings_screen):
+		return
+		
 	if is_game_won:
 		return
 	if not is_instance_valid(character1) or not is_instance_valid(character2):
@@ -76,6 +138,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("switch_view"):
+		is_trail_armed = true
 		toggle_view()
 		get_viewport().set_input_as_handled()
 		return
@@ -106,6 +169,8 @@ func load_level(index: int) -> void:
 	maze2 = null
 	character1 = null
 	character2 = null
+	
+	clear_trails()
 
 	current_level_index = index
 	var data = LEVEL_DATA[index]
@@ -150,12 +215,48 @@ func load_level(index: int) -> void:
 	character2.swap_zone_entered.connect(_on_swap_zone_entered)
 	maze2.add_child(character2)
 
+	# Custom visual representation for the Dream Core Finale
+	if current_level_index == 4:
+		customize_dream_core_goals()
+
 	restart_game()
+
+	# If this is the Dream Core room, show the Dream Core Finale introductory screen before gameplay
+	if current_level_index == 4:
+		show_dream_core_intro()
+
+func show_dream_core_intro() -> void:
+	if is_instance_valid(dream_core_intro):
+		dream_core_intro.queue_free()
+		
+	var dc_res = load("res://UI/dream_core_intro.tscn")
+	dream_core_intro = dc_res.instantiate()
+	add_child(dream_core_intro)
+	is_game_won = true # Keep input blocked
+	dream_core_intro.continue_pressed.connect(_on_dream_core_intro_continued)
+
+func _on_dream_core_intro_continued() -> void:
+	dream_core_intro.queue_free()
+	is_game_won = false # Allow gameplay starting
+
+func customize_dream_core_goals() -> void:
+	# Modify goals visual representation to look like a glowing Dream Core target
+	if is_instance_valid(maze1) and is_instance_valid(maze1.goal_sprite):
+		maze1.goal_sprite.modulate = Color(0.9, 0.4, 0.9, 1.0)
+		maze1.goal_sprite.scale = Vector2(1.3, 1.3)
+	if is_instance_valid(maze2) and is_instance_valid(maze2.goal_sprite):
+		maze2.goal_sprite.modulate = Color(0.9, 0.4, 0.9, 1.0)
+		maze2.goal_sprite.scale = Vector2(1.3, 1.3)
 
 func _on_swap_zone_entered() -> void:
 	if is_game_won:
 		return
 	print("SWAP — char1: ", character1.grid_pos, "  char2: ", character2.grid_pos)
+	
+	# Trigger Echo Trail system before teleporting the players
+	if is_trail_armed and not trail_revealed_this_level:
+		show_echo_trails()
+	
 	character1.is_inverted = !character1.is_inverted
 	character2.is_inverted = !character2.is_inverted
 	character1.update_sprite()
@@ -163,6 +264,40 @@ func _on_swap_zone_entered() -> void:
 	character1.teleport_to_swap()
 	character2.teleport_to_swap()
 	toggle_view()
+
+func show_echo_trails() -> void:
+	trail_revealed_this_level = true
+	
+	# P1 trail on Maze 1
+	var line1 = Line2D.new()
+	line1.width = 4.0
+	line1.default_color = Color(0.2, 0.7, 1.0, 0.8) # Blue/Cyan for P1
+	line1.z_index = 5
+	line1.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for pt in character1.path_history:
+		line1.add_point(Vector2(pt.x * 32 + 16, pt.y * 32 + 16))
+	maze1.add_child(line1)
+	current_trail_lines.append(line1)
+	
+	# P2 trail on Maze 2
+	var line2 = Line2D.new()
+	line2.width = 4.0
+	line2.default_color = Color(1.0, 0.5, 0.2, 0.8) # Orange/Red for P2
+	line2.z_index = 5
+	line2.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for pt in character2.path_history:
+		line2.add_point(Vector2(pt.x * 32 + 16, pt.y * 32 + 16))
+	maze2.add_child(line2)
+	current_trail_lines.append(line2)
+	
+	# Start 3 second fade-out timer
+	get_tree().create_timer(3.0).timeout.connect(clear_trails)
+
+func clear_trails() -> void:
+	for line in current_trail_lines:
+		if is_instance_valid(line):
+			line.queue_free()
+	current_trail_lines.clear()
 
 func toggle_view() -> void:
 	current_view = 2 if current_view == 1 else 1
@@ -186,7 +321,56 @@ func _on_character_goal_reached() -> void:
 		maze2.set_occupied(character2.has_reached_goal)
 
 	hud.set_completion_status(character1.has_reached_goal, character2.has_reached_goal)
-	check_win_condition()
+	
+	if current_level_index == 4:
+		# Let the movement finish completely before ending checks
+		await get_tree().process_frame
+		check_dream_core_endings()
+	else:
+		check_win_condition()
+
+func check_dream_core_endings() -> void:
+	if is_game_won:
+		return
+	
+	# Evaluate goals reached after movements are finalized
+	var p1_reached = (character1.grid_pos == character1.goal_grid_pos)
+	var p2_reached = (character2.grid_pos == character2.goal_grid_pos)
+	
+	if p1_reached or p2_reached:
+		is_game_won = true # Stop player movement/further actions
+		
+		# Short delay so the step to the core is visible
+		await get_tree().create_timer(0.4).timeout
+		
+		if p1_reached and p2_reached:
+			show_ending_screen("shared")
+		elif p1_reached:
+			show_ending_screen("p1_solo")
+		elif p2_reached:
+			show_ending_screen("p2_solo")
+
+func show_ending_screen(type: String) -> void:
+	if is_instance_valid(endings_screen):
+		endings_screen.queue_free()
+		
+	var endings_res = load("res://UI/endings_screen.tscn")
+	endings_screen = endings_res.instantiate()
+	add_child(endings_screen)
+	endings_screen.setup_ending(type)
+	endings_screen.restart_game_pressed.connect(_on_ending_restart)
+	endings_screen.return_to_title_pressed.connect(_on_ending_return_to_title)
+	endings_screen.quit_pressed.connect(_on_win_screen_quit)
+
+func _on_ending_restart() -> void:
+	endings_screen.queue_free()
+	# Restart Game must begin again from Level 0 (Tutorial) directly, skipping intro
+	hud.visible = true
+	load_level(0)
+
+func _on_ending_return_to_title() -> void:
+	endings_screen.queue_free()
+	show_story_introduction()
 
 func check_win_condition() -> void:
 	if is_game_won:
@@ -206,14 +390,24 @@ func check_win_condition() -> void:
 		if not is_game_won:
 			return   # Was cancelled by retry/load during wait
 
+		# Level 3 (Cloud) completion offers entry into the Dream Core
 		var is_last = (current_level_index == LEVEL_DATA.size() - 1)
 		win_screen.setup_screen(is_last)
+		
+		# If level is Cloud (index 3), change primary button text to "Enter the Dream Core"
+		if current_level_index == 3:
+			win_screen.primary_button.text = "Enter the Dream Core"
+			
 		win_screen.visible = true
 
 func restart_game() -> void:
 	is_game_won = false
 	win_screen.visible = false
 	current_view = 1
+
+	is_trail_armed = false
+	trail_revealed_this_level = false
+	clear_trails()
 
 	if is_instance_valid(character1):
 		character1.reset_to_start()
