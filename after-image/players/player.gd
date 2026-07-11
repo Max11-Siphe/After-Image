@@ -71,6 +71,13 @@ func move_to_grid_pos() -> void:
 		check_swap()
 	)
 
+func teleport_to_swap() -> void:
+	if swap_grid_pos.x < 0:
+		return
+	grid_pos = swap_grid_pos
+	position = Vector2(grid_pos.x * 32 + 16, grid_pos.y * 32 + 16)
+	is_moving = false
+
 func check_swap() -> void:
 	if swap_grid_pos.x >= 0 and grid_pos == swap_grid_pos:
 		swap_zone_entered.emit()

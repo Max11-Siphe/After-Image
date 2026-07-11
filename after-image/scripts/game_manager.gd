@@ -155,10 +155,13 @@ func load_level(index: int) -> void:
 func _on_swap_zone_entered() -> void:
 	if is_game_won:
 		return
+	print("SWAP — char1: ", character1.grid_pos, "  char2: ", character2.grid_pos)
 	character1.is_inverted = !character1.is_inverted
 	character2.is_inverted = !character2.is_inverted
 	character1.update_sprite()
 	character2.update_sprite()
+	character1.teleport_to_swap()
+	character2.teleport_to_swap()
 	toggle_view()
 
 func toggle_view() -> void:
